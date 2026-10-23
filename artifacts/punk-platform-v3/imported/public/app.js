@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
   let selectedImageDataUrl = '';
   let imageReady = Promise.resolve();
   let followed = false;
-  const maxLocalImageBytes = 120 * 1024;
+  const maxLocalImageBytes = 900 * 1024;
   const baseRender = render;
   const baseBind = bind;
   const baseModal = modal;
@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
     for (const t of tokens) {
       const data = t.imgData;
       if (typeof data !== 'string' || data.length > maxLocalImageBytes ||
-          !/^data:image\/(?:webp|jpeg);base64,[A-Za-z0-9+/=]+$/.test(data)) continue;
+          !/^data:image\/(?:png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/.test(data)) continue;
       root.querySelectorAll('img[alt]').forEach(img => {
         if (img.alt === t.name) img.src = data;
       });
@@ -85,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
       if (upload && !$('#upload-note')) {
         const note = document.createElement('small');
         note.id = 'upload-note';
-        note.textContent = 'Compressed image is stored only in this browser; nothing is uploaded.';
+        note.textContent = 'High-quality image is stored locally in this browser.';
         upload.insertAdjacentElement('afterend', note);
       }
       const showImageError = (text) => {
@@ -131,25 +131,41 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
           const image = new Image();
           image.onload = () => {
             try {
-              const scale = Math.min(1, 256 / Math.max(image.naturalWidth, image.naturalHeight));
+              const maxDimension = 1024;
+              const scale = Math.min(
+                1,
+                maxDimension / Math.max(image.naturalWidth, image.naturalHeight)
+              );
+
               const canvas = document.createElement('canvas');
               canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
               canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+
               const context = canvas.getContext('2d');
               if (!context) throw new Error('Canvas unavailable');
+
+              context.imageSmoothingEnabled = true;
+              context.imageSmoothingQuality = 'high';
               context.drawImage(image, 0, 0, canvas.width, canvas.height);
-              let dataUrl = canvas.toDataURL('image/webp', 0.72);
-              if (!dataUrl.startsWith('data:image/webp')) dataUrl = canvas.toDataURL('image/jpeg', 0.72);
-              if (dataUrl.length > maxLocalImageBytes) {
-                dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+
+              let dataUrl = canvas.toDataURL('image/webp', 0.95);
+
+              if (!dataUrl.startsWith('data:image/webp')) {
+                dataUrl = canvas.toDataURL('image/jpeg', 0.95);
               }
-              if (dataUrl.length > maxLocalImageBytes) {
+
+              if (dataUrl.length > 900 * 1024) {
+                dataUrl = canvas.toDataURL('image/webp', 0.85);
+              }
+
+              if (dataUrl.length > 900 * 1024) {
                 selectedImageDataUrl = '';
-                showImageError('Compressed image is still too large for local demo storage. Choose a simpler image.');
+                showImageError('Image is too large for local storage.');
               } else {
                 selectedImageDataUrl = dataUrl;
-                announce('Compressed image ready; it will be stored only in this browser.');
+                announce('High-quality image ready.');
               }
+
             } catch (_) {
               selectedImageDataUrl = '';
               showImageError('This image could not be prepared for local demo storage.');
