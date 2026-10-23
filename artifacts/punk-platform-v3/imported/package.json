@@ -1,0 +1,1 @@
+{"name":"punk-platform-v3","version":"3.0.0","private":true,"type":"module","scripts":{"start":"node server.js","check":"node --check public/app.js && node --check server.js"},"dependencies":{"express":"^4.21.2"}}

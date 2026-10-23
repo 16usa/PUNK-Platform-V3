@@ -1,15 +1,17 @@
-# [Project name]
+# PUNK Platform V3
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+An imported, responsive demo of a meme-token launchpad concept. Trading, balances, market data, and X Money screens are simulated locally; the app does not connect to Solana or execute trades.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/punk-platform-v3 run dev` — run the PUNK web preview
+- `pnpm --filter @workspace/punk-platform-v3 run check` — syntax-check the imported app and server
+- `pnpm --filter @workspace/punk-platform-v3 run build` — build the static app
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
 - `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- The preview uses Replit's `PORT` and binds to `0.0.0.0`; no secrets or database are needed by this demo.
 
 ## Stack
 
@@ -22,23 +24,30 @@ _Replace the heading above with the project's name, and this line with one sente
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/punk-platform-v3/imported/` — full source archive, including its Express server, static UI, images, and original reference panels.
+- `artifacts/punk-platform-v3/imported/public/app.js` — demo navigation, token state, simulated trading, forms, and reference gallery.
+- `artifacts/punk-platform-v3/imported/public/style.css` — original dark interface and responsive styles.
+- `artifacts/punk-platform-v3/TECHNICAL_REPORT.md` — implementation inventory and safe Solana readiness plan.
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The original UI source and reference images are retained under `imported/`; do not replace them with a new template.
+- Vite is used to build the static UI; the Replit preview runs the archive's Express server.
+- Local browser storage only persists demo tokens, balances, and transactions. It is not a wallet or durable account system.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The demo includes discovery, token detail and simulated buy/sell, token creation, creator profile, portfolio, transaction history, settings, leaderboard, and the original-reference gallery.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Preserve the supplied design reference and sample values; do not claim real X Money, wallet, or blockchain functionality.
+- Do not publish the app or activate mainnet trading without explicit user approval.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- User-visible balances and trades are simulated in localStorage and can be reset by clearing site storage.
+- No real Solana transactions, deployed contracts, live market feeds, or X integrations exist.
 
 ## Pointers
 

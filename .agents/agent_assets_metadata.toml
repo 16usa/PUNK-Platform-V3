@@ -1,0 +1,16 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "49fkPvQj3vR8M26sDOC_q"
+uri = "file://artifacts/punk-platform-v3/TECHNICAL_REPORT.md"
+type = "text"
+title = "PUNK Platform V3 — Technical Readiness Report"
+description = "Implementation status and the work required before safely adding real Solana functionality."
+logical_id = "1f511ccd-8317-4a37-9a77-6d94e72599c2"
+content_hash = "sha256:8592db6b08e9d67419a7135fc277b8b69ced16cd6bf924c34c75261abb3d9413"
+size = 4128
+mtime_ms = 1792762407870
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:2a5fd290-1ea9-4044-a8b3-76aaaccf37cb/1f511ccd-8317-4a37-9a77-6d94e72599c2/6467ebbd-9a1e-4873-88cb-b190614b5f18"
+storage_version_token = "1792763035930219"
+content_type = "text/markdown"
