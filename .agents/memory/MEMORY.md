@@ -1,0 +1,1 @@
+- [Static artifact packaging](replit-static-publicdir-deploy.md) — Keep a production artifact's built `publicDir` out of `.replitignore`, or static deploys can 500 after a successful build.
