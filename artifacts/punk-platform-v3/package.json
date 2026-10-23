@@ -76,6 +76,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
-    "express": "^4.22.3"
+    "express": "^4.22.3",
+    "pg": "^8.23.1"
   }
 }

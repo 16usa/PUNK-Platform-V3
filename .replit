@@ -1,3 +1,4 @@
+run = "pnpm --filter @workspace/punk-platform-v3 dev"
 modules = ["nodejs-24"]
 
 [deployment]

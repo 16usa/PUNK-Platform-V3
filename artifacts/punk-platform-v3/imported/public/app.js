@@ -21,7 +21,10 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
       if (typeof data !== 'string' || data.length > maxLocalImageBytes ||
           !/^data:image\/(?:png|webp|jpeg);base64,[A-Za-z0-9+/=]+$/.test(data)) continue;
       root.querySelectorAll('img[alt]').forEach(img => {
-        if (img.alt === t.name) img.src = data;
+        if (img.alt === t.name && img.src !== data) {
+          img.src = data;
+          img.decoding = 'async';
+        }
       });
     }
   }
@@ -129,41 +132,85 @@ document.addEventListener('DOMContentLoaded', function punkEnhance() {
         announce(`${file.name} selected`);
         imageReady = new Promise((resolve) => {
           const image = new Image();
-          image.onload = () => {
+          image.onload = async () => {
             try {
-              const maxDimension = 1024;
-              const scale = Math.min(
-                1,
-                maxDimension / Math.max(image.naturalWidth, image.naturalHeight)
-              );
+              const maxStoredLength = maxLocalImageBytes;
 
-              const canvas = document.createElement('canvas');
-              canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-              canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+              const readOriginal = () => new Promise((done, fail) => {
+                const reader = new FileReader();
+                reader.onload = () => done(String(reader.result || ''));
+                reader.onerror = () => fail(new Error('File read failed'));
+                reader.readAsDataURL(file);
+              });
 
-              const context = canvas.getContext('2d');
-              if (!context) throw new Error('Canvas unavailable');
+              const originalData = await readOriginal();
 
-              context.imageSmoothingEnabled = true;
-              context.imageSmoothingQuality = 'high';
-              context.drawImage(image, 0, 0, canvas.width, canvas.height);
-
-              let dataUrl = canvas.toDataURL('image/webp', 0.95);
-
-              if (!dataUrl.startsWith('data:image/webp')) {
-                dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-              }
-
-              if (dataUrl.length > 900 * 1024) {
-                dataUrl = canvas.toDataURL('image/webp', 0.85);
-              }
-
-              if (dataUrl.length > 900 * 1024) {
-                selectedImageDataUrl = '';
-                showImageError('Image is too large for local storage.');
+              if (
+                /^data:image\/(?:png|jpeg|webp);base64,/.test(originalData) &&
+                originalData.length <= maxStoredLength
+              ) {
+                selectedImageDataUrl = originalData;
+                announce('Original image preserved without compression.');
               } else {
-                selectedImageDataUrl = dataUrl;
-                announce('High-quality image ready.');
+                let dataUrl = '';
+                const dimensions = [2048, 1536, 1024, 768, 512];
+                const qualities = [0.98, 0.95, 0.90, 0.85];
+
+                for (const dimension of dimensions) {
+                  const scale = Math.min(
+                    1,
+                    dimension / Math.max(
+                      image.naturalWidth,
+                      image.naturalHeight
+                    )
+                  );
+
+                  const canvas = document.createElement('canvas');
+                  canvas.width = Math.max(
+                    1, Math.round(image.naturalWidth * scale)
+                  );
+                  canvas.height = Math.max(
+                    1, Math.round(image.naturalHeight * scale)
+                  );
+
+                  const ctx = canvas.getContext('2d');
+                  if (!ctx) throw new Error('Canvas unavailable');
+
+                  ctx.imageSmoothingEnabled = true;
+                  ctx.imageSmoothingQuality = 'high';
+                  ctx.drawImage(
+                    image, 0, 0, canvas.width, canvas.height
+                  );
+
+                  for (const quality of qualities) {
+                    let candidate = canvas.toDataURL(
+                      'image/webp', quality
+                    );
+
+                    if (!candidate.startsWith('data:image/webp')) {
+                      candidate = canvas.toDataURL(
+                        'image/jpeg', quality
+                      );
+                    }
+
+                    if (candidate.length <= maxStoredLength) {
+                      dataUrl = candidate;
+                      break;
+                    }
+                  }
+
+                  if (dataUrl) break;
+                }
+
+                if (!dataUrl) {
+                  selectedImageDataUrl = '';
+                  showImageError(
+                    'Image is too large for local browser storage.'
+                  );
+                } else {
+                  selectedImageDataUrl = dataUrl;
+                  announce('High-quality image prepared.');
+                }
               }
 
             } catch (_) {

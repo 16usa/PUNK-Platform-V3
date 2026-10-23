@@ -1,3 +1,4 @@
+import punkRegistryDevApi from './punk-registry-dev-api.mjs';
 import path from 'path';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
@@ -30,6 +31,7 @@ if (!basePath) {
 export default defineConfig({
   base: basePath,
   plugins: [
+    punkRegistryDevApi(),
     react(),
     tailwindcss(),
     runtimeErrorOverlay(),
