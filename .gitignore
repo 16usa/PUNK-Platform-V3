@@ -53,3 +53,11 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.replit-cache/
