@@ -1,4 +1,4 @@
-run = "pnpm --filter @workspace/punk-platform-v3 dev"
+run = "bash scripts/punk-express-start.sh"
 modules = ["nodejs-24"]
 
 [deployment]
@@ -10,7 +10,7 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
+runButton = "PUNK API V4"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -19,3 +19,26 @@ expertMode = true
 [postMerge]
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
+
+# PUNK X STONK API FIX V3
+[[workflows.workflow]]
+name = "PUNK API V3"
+author = "user"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd artifacts/punk-platform-v3/imported && node server.js"
+waitForPort = 3000
+
+[[workflows.workflow]]
+name = "PUNK API V4"
+author = "user"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash scripts/punk-express-start.sh"
+waitForPort = 3000
+
+[[ports]]
+localPort = 3000
+externalPort = 80

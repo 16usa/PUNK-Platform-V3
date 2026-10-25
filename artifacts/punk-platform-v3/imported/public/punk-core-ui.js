@@ -244,10 +244,48 @@ function render() {
       'Real rankings will appear after the trading engine is integrated.'
     );
   } else if (currentPage === 'create') {
-    page.innerHTML = unavailable(
-      'Create Token',
-      'Token creation will be enabled after X authentication and secure server-side creation are ready.'
-    );
+    page.innerHTML = `
+      <section>
+        <div class="section-head"><div><h1>Create Token</h1>
+          <p>Create and prepare your StonkFun token without leaving PUNK.</p>
+        </div><span class="demo-pill">STONKFUN</span></div>
+        <div class="panel punk-stonk-editor">
+          <p class="punk-stonk-note" id="punk-stonk-x-status" role="status">Checking X account…</p>
+          <p class="punk-stonk-note" id="punk-stonk-wallet-state">Wallet not connected</p>
+          <p id="punk-stonk-onsite-status" role="status" aria-live="polite">Connecting to StonkFun…</p>
+          <form id="punk-stonk-create-form" autocomplete="off">
+            <div class="punk-stonk-grid">
+              <div><label for="punk-stonk-name">Token name *</label>
+                <input id="punk-stonk-name" name="name" maxlength="32" required placeholder="Token name"></div>
+              <div><label for="punk-stonk-symbol">Symbol *</label>
+                <input id="punk-stonk-symbol" name="symbol" maxlength="10" required pattern="[A-Za-z0-9]{1,10}" placeholder="TICKER"></div>
+            </div>
+            <label for="punk-stonk-image">Token image * · PNG, JPEG or WebP (max 2 MB)</label>
+            <input id="punk-stonk-image" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
+            <img id="punk-stonk-image-preview" alt="Token image preview" hidden>
+            <label for="punk-stonk-description">Description</label>
+            <textarea id="punk-stonk-description" name="description" maxlength="1000" placeholder="What is your token about?"></textarea>
+            <div class="punk-stonk-grid">
+              <div><label for="punk-stonk-website">Website</label>
+                <input id="punk-stonk-website" name="website" type="url" placeholder="https://example.com"></div>
+              <div><label for="punk-stonk-twitter">X / Twitter link</label>
+                <input id="punk-stonk-twitter" name="twitter" type="url" placeholder="https://x.com/project"></div>
+            </div>
+            <label for="punk-stonk-telegram">Telegram</label>
+            <input id="punk-stonk-telegram" name="telegram" type="url" placeholder="https://t.me/project">
+            <label for="punk-stonk-quote">Quote token * · live StonkFun pairs</label>
+            <select id="punk-stonk-quote" name="quoteMint" required disabled>
+              <option value="">Loading…</option>
+            </select>
+            <div class="punk-stonk-actions">
+              <button class="btn" type="button" id="punk-stonk-wallet-button">Connect Wallet</button>
+              <button class="btn primary" type="submit">Review Token</button>
+            </div>
+          </form>
+          <div id="punk-stonk-review" class="punk-stonk-review" hidden></div>
+          <p class="punk-stonk-note"><strong>Launch is not enabled yet.</strong> This step prepares the on-site form, live quote list and wallet connection only. Mint creation, metadata upload, and transaction signing are still required. No funds move and nothing is launched by Review Token.</p>
+        </div>
+      </section>`;
   } else if (currentPage === 'portfolio') {
     page.innerHTML = unavailable(
       'Portfolio',
@@ -296,7 +334,7 @@ async function loadRegistry() {
         : 'REGISTRY OFFLINE';
     }
 
-    render();
+    if (currentPage !== 'create') render();
   }
 }
 
@@ -327,13 +365,7 @@ document.addEventListener('click', event => {
   }
 });
 
-document.getElementById('connect')
-  ?.addEventListener('click', () => {
-    alert(
-      'X authentication is not connected yet. ' +
-      'PUNK will support X sign-in in a future development stage.'
-    );
-  });
+// X sign-in is now handled by punk-x-stonk-client.js.
 
 render();
 loadRegistry();

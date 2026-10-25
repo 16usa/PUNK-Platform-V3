@@ -94,3 +94,17 @@
     font-size: 11px;
   }
 }
+/* PUNK on-site StonkFun launch editor; inherits existing PUNK visual style. */
+.punk-stonk-editor {padding:24px; margin:20px 0 36px;}
+.punk-stonk-editor label {display:block; font-size:13px; color:#b9ccdc; margin:16px 0 7px;}
+.punk-stonk-editor input,.punk-stonk-editor textarea,.punk-stonk-editor select{width:100%;box-sizing:border-box;background:#081521;color:#ebf4fb;border:1px solid #284059;padding:13px 14px;border-radius:6px;font:inherit;}
+.punk-stonk-editor select:disabled{opacity:.65}
+.punk-stonk-editor textarea{min-height:96px;resize:vertical}
+.punk-stonk-editor .punk-stonk-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 15px}
+.punk-stonk-editor .punk-stonk-actions{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:22px}
+.punk-stonk-editor .punk-stonk-note{color:#9cb1c6;font-size:13px;line-height:1.6}
+.punk-stonk-editor .punk-stonk-review{border:1px solid #27435a;background:#071624;margin:20px 0 0;padding:16px;overflow-wrap:anywhere;font-size:13px}
+.punk-stonk-editor img#punk-stonk-image-preview{height:94px;width:94px;object-fit:cover;margin:14px 0;border-radius:6px}
+#punk-stonk-onsite-status[data-state="error"]{color:#ff8592}
+#punk-stonk-onsite-status[data-state="info"]{color:#77dabe}
+@media(max-width:650px){.punk-stonk-editor{padding:18px}.punk-stonk-editor .punk-stonk-grid{grid-template-columns:1fr}}

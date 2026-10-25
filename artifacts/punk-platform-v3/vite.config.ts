@@ -1,3 +1,4 @@
+import { punkXStonkMiddleware } from './punk-x-stonk/routes.mjs';
 import punkRegistryDevApi from './punk-registry-dev-api.mjs';
 import path from 'path';
 import react from '@vitejs/plugin-react';
@@ -31,6 +32,11 @@ if (!basePath) {
 export default defineConfig({
   base: basePath,
   plugins: [
+    {
+      name: 'punk-x-stonk-api',
+      configureServer(server) { server.middlewares.use(punkXStonkMiddleware); },
+      configurePreviewServer(server) { server.middlewares.use(punkXStonkMiddleware); },
+    },
     punkRegistryDevApi(),
     react(),
     tailwindcss(),
