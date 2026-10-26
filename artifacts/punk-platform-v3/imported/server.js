@@ -7,6 +7,17 @@ const { Pool } = pg;
 
 const app = express();
 app.disable('x-powered-by');
+// PUNK Preview verification: proves WHICH process handles the browser request.
+app.get('/api/punk/runtime', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({
+    ok: true,
+    service: 'express',
+    marker: 'punk-express-adaptive-v1.4',
+    port: Number(process.env.PORT) || 3000
+  });
+});
+
 app.use(punkXMiddleware);
 app.use(punkLaunchMiddleware);
 

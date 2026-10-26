@@ -10,7 +10,7 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "PUNK API V4"
+runButton = "PUNK VERIFIED EXPRESS"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -42,3 +42,13 @@ waitForPort = 3000
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+# Independent PUNK API Preview; no Stonk/Pump integration.
+[[workflows.workflow]]
+name = "PUNK VERIFIED EXPRESS"
+author = "user"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=3000 bash scripts/punk-express-start.sh"
+waitForPort = 3000
