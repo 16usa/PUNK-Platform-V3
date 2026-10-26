@@ -1,6 +1,4 @@
-// PUNK X + StonkFun V1
-// Server-side X OAuth with PKCE, database-backed sessions, read-only StonkFun bridge.
-// This module never signs or submits a token-launch transaction.
+// PUNK X OAuth 2.0 with PKCE and PostgreSQL sessions. No launchpad dependency.
 import crypto from 'node:crypto';
 import pg from 'pg';
 
@@ -8,8 +6,6 @@ const { Pool } = pg;
 const SESSION_NAME = 'punk_x_session';
 const FLOW_NAME = 'punk_x_oauth_state';
 const SEVEN_DAYS = 7 * 24 * 60 * 60;
-const STONK_BASE = 'https://www.stonkfun.xyz/api/public/v1';
-const allowedSort = new Set(['newest', 'marketCap', 'volume']);
 let pool;
 let schemaReady;
 
@@ -236,66 +232,15 @@ async function handleOAuth(req, res, url) {
   }
 }
 
-async function handleStonk(req, res, url) {
-  if (req.method !== 'GET') return json(res, 405, { error: 'Read-only API: GET only' });
-  let endpoint;
-  if (url.pathname === '/api/stonk/pairs') {
-    endpoint = '/pairs?launchable=true&launchLabReady=true';
-  } else if (url.pathname === '/api/stonk/stats') {
-    endpoint = '/stats';
-  } else if (url.pathname === '/api/stonk/tokens') {
-    const sort = url.searchParams.get('sort') || 'newest';
-    if (!allowedSort.has(sort)) return json(res, 400, { error: 'Invalid sort' });
-    endpoint = '/tokens?sort=' + encodeURIComponent(sort) + '&pageSize=25';
-  } else {
-    return json(res, 404, { error: 'Not found' });
-  }
-
-  const upstream = await fetch(STONK_BASE + endpoint, {
-    headers: { Accept: 'application/json' },
-    signal: AbortSignal.timeout(12000),
-  });
-  const contentType = upstream.headers.get('content-type') || '';
-  if (!contentType.includes('json')) {
-    return json(res, 502, { error: 'StonkFun did not return JSON' });
-  }
-  const body = await upstream.json();
-  return json(res, upstream.status, body, {
-    'Cache-Control': upstream.ok ? 'public, max-age=15' : 'no-store',
-    ...(upstream.status === 429 && upstream.headers.get('retry-after')
-      ? { 'Retry-After': upstream.headers.get('retry-after') } : {}),
-  });
-}
-
-export async function punkXStonkMiddleware(req, res, next) {
+export async function punkXMiddleware(req, res, next) {
   let url;
   try { url = new URL(req.url || '/', 'http://localhost'); }
   catch { return next(); }
-
-  // PUNK X STONK API V4: route diagnostics
-  // Safe, public, no credentials or database details disclosed.
-  if (url.pathname === '/api/punk/status') {
-    if (req.method !== 'GET') return json(res, 405, { error: 'Method not allowed' });
-    return json(res, 200, {
-      ok: true,
-      service: 'punk-express-or-vite',
-      version: 'x-stonk-v4',
-      xConfigured: !!config(),
-      stonkProxy: 'configured',
-      onChainLaunch: false,
-    });
-  }
-
-  const oauthPaths = new Set(['/api/x/me', '/api/x/logout', '/auth/x/start', '/auth/x/callback']);
-  const isX = oauthPaths.has(url.pathname);
-  const isStonk = url.pathname.startsWith('/api/stonk/');
-  if (!isX && !isStonk) return next();
-
-  try {
-    if (isX) return await handleOAuth(req, res, url);
-    return await handleStonk(req, res, url);
-  } catch (error) {
-    console.error('PUNK X/Stonk integration:', error?.message || 'Unknown error');
-    if (!res.headersSent) return json(res, 503, { error: 'Integration temporarily unavailable' });
+  const paths = new Set(['/api/x/me','/api/x/logout','/auth/x/start','/auth/x/callback']);
+  if (!paths.has(url.pathname)) return next();
+  try { return await handleOAuth(req, res, url); }
+  catch (error) {
+    console.error('PUNK X OAuth:', error?.message || 'Unknown error');
+    if (!res.headersSent) json(res, 503, {error:'X authentication unavailable'});
   }
 }

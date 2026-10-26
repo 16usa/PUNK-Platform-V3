@@ -1,4 +1,5 @@
-import { punkXStonkMiddleware } from '../punk-x-stonk/routes.mjs';
+import { punkXMiddleware } from '../punk-x/routes.mjs';
+import { punkLaunchMiddleware } from '../punk-launch/routes.mjs';
 import express from 'express';
 import pg from 'pg';
 
@@ -6,7 +7,8 @@ const { Pool } = pg;
 
 const app = express();
 app.disable('x-powered-by');
-app.use(punkXStonkMiddleware);
+app.use(punkXMiddleware);
+app.use(punkLaunchMiddleware);
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,

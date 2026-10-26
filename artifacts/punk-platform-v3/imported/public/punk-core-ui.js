@@ -2,7 +2,7 @@
 // PUNK CORE V3 — real PostgreSQL registry UI.
 // Trading, payments and X OAuth are not enabled.
 
-const API = '/api/tokens';
+const API = '/api/punk/launches';
 
 let registry = [];
 let connected = false;
@@ -49,7 +49,7 @@ function imageMarkup(token) {
 function statusText() {
   if (loading) return 'Connecting to PUNK database...';
   if (!connected) return 'PUNK database unavailable.';
-  return `${registry.length} registered token(s)`;
+  return `${registry.length} minted Devnet token(s)`;
 }
 
 function emptyState() {
@@ -68,7 +68,7 @@ function emptyState() {
   return `<div class="panel punk-empty">
     <h3>No tokens launched yet</h3>
     <p>The PUNK registry is connected,
-    but there are no active tokens.</p>
+    but there are no confirmed Devnet mints yet.</p>
   </div>`;
 }
 
@@ -94,7 +94,7 @@ function tokenRows(items) {
           <small>CREATED</small>
           <b>${esc(dateText(t.created_at))}</b>
         </span>
-        <span class="green">ACTIVE</span>
+        <span class="green">DEVNET MINTED</span>
       </button>
     `).join('')}
   </div>`;
@@ -110,7 +110,7 @@ function home() {
         Built around the X ecosystem.</p>
         <div class="hero-actions">
           <button class="btn primary"
-            data-go="trending">Explore Tokens</button>
+            data-go="new">Explore Tokens</button>
           <button class="btn"
             data-go="create">Create Token</button>
         </div>
@@ -118,22 +118,8 @@ function home() {
     </section>
 
     <div class="stats">
-      <div class="stat">
-        <strong>${connected ? registry.length : '—'}</strong>
-        <span>Active Registered Tokens</span>
-      </div>
-      <div class="stat">
-        <strong>—</strong>
-        <span>24h Trading Volume · Unavailable</span>
-      </div>
-      <div class="stat">
-        <strong>—</strong>
-        <span>Active Traders · Unavailable</span>
-      </div>
-      <div class="stat">
-        <strong>Not connected</strong>
-        <span>X Money</span>
-      </div>
+      <div class="stat"><strong>${connected ? registry.length : '—'}</strong><span>Devnet Minted Tokens</span></div>
+      <div class="stat"><strong>DEVNET</strong><span>Network · No Mainnet or Trading Yet</span></div>
     </div>
 
     <section>
@@ -192,8 +178,7 @@ function tokenDetail() {
         <p><b>Created:</b> ${esc(dateText(t.created_at))}</p>
         <p>${esc(t.description || '')}</p>
         <div class="panel punk-empty">
-          Trading is not available yet.
-          No live price or liquidity exists in the registry.
+          No trading pool exists yet. This is a Devnet mint only.
         </div>
       </div>
     </section>
@@ -225,7 +210,7 @@ function render() {
   } else if (currentPage === 'new') {
     page.innerHTML = listing(
       'New Tokens',
-      'Real token records from PUNK PostgreSQL.',
+      'Confirmed Solana Devnet mints created on PUNK.',
       [...registry].sort((a, b) =>
         new Date(b.created_at) - new Date(a.created_at)
       )
@@ -233,7 +218,7 @@ function render() {
   } else if (currentPage === 'trending') {
     page.innerHTML = listing(
       'Trending',
-      'Registered tokens. Trading-based rankings are not available yet.',
+      'Registered tokens. No trading or liquidity yet — mint-only Devnet pilot.',
       registry
     );
   } else if (currentPage === 'token') {
@@ -246,44 +231,52 @@ function render() {
   } else if (currentPage === 'create') {
     page.innerHTML = `
       <section>
-        <div class="section-head"><div><h1>Create Token</h1>
-          <p>Create and prepare your StonkFun token without leaving PUNK.</p>
-        </div><span class="demo-pill">STONKFUN</span></div>
-        <div class="panel punk-stonk-editor">
-          <p class="punk-stonk-note" id="punk-stonk-x-status" role="status">Checking X account…</p>
-          <p class="punk-stonk-note" id="punk-stonk-wallet-state">Wallet not connected</p>
-          <p id="punk-stonk-onsite-status" role="status" aria-live="polite">Connecting to StonkFun…</p>
-          <form id="punk-stonk-create-form" autocomplete="off">
-            <div class="punk-stonk-grid">
-              <div><label for="punk-stonk-name">Token name *</label>
-                <input id="punk-stonk-name" name="name" maxlength="32" required placeholder="Token name"></div>
-              <div><label for="punk-stonk-symbol">Symbol *</label>
-                <input id="punk-stonk-symbol" name="symbol" maxlength="10" required pattern="[A-Za-z0-9]{1,10}" placeholder="TICKER"></div>
+        <div class="section-head"><div><h1>Launch Token</h1>
+          <p>Independent PUNK token creation. No third-party launchpad redirect.</p>
+        </div><span class="demo-pill">SOLANA DEVNET</span></div>
+        <div class="panel punk-launch-editor">
+          <p class="punk-launch-note"><strong>Devnet pilot:</strong> creates a real Token-2022 mint on the Solana test network.
+          This does not create a trading pool or mainnet token. Do not send real SOL.</p>
+          <p class="punk-launch-state" id="punk-launch-x-status" role="status">Checking X account…</p>
+          <p class="punk-launch-state" id="punk-wallet-state">Phantom wallet not connected</p>
+          <p class="punk-launch-state" id="punk-launch-status" role="status" aria-live="polite">
+            Connect X and Phantom to launch on Devnet.</p>
+          <div id="punk-launch-resume" class="punk-launch-resume" hidden>
+            <p id="punk-launch-pending"></p>
+            <button type="button" class="btn" id="punk-launch-resume-button">Resume previous mint</button>
+          </div>
+          <form id="punk-launch-form" autocomplete="off">
+            <div class="punk-launch-grid">
+              <div><label for="punk-launch-name">Token name *</label>
+                <input id="punk-launch-name" name="name" maxlength="32" minlength="2" required placeholder="Token name"></div>
+              <div><label for="punk-launch-symbol">Symbol *</label>
+                <input id="punk-launch-symbol" name="symbol" maxlength="10" required pattern="[A-Za-z0-9]{2,10}" placeholder="TICKER"></div>
             </div>
-            <label for="punk-stonk-image">Token image * · PNG, JPEG or WebP (max 2 MB)</label>
-            <input id="punk-stonk-image" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
-            <img id="punk-stonk-image-preview" alt="Token image preview" hidden>
-            <label for="punk-stonk-description">Description</label>
-            <textarea id="punk-stonk-description" name="description" maxlength="1000" placeholder="What is your token about?"></textarea>
-            <div class="punk-stonk-grid">
-              <div><label for="punk-stonk-website">Website</label>
-                <input id="punk-stonk-website" name="website" type="url" placeholder="https://example.com"></div>
-              <div><label for="punk-stonk-twitter">X / Twitter link</label>
-                <input id="punk-stonk-twitter" name="twitter" type="url" placeholder="https://x.com/project"></div>
+            <label for="punk-launch-image">Token image * · original PNG/JPG/WebP up to 256 KB</label>
+            <input id="punk-launch-image" type="file" name="image" accept="image/png,image/jpeg,image/webp" required>
+            <img id="punk-launch-preview" alt="Token image preview" hidden>
+            <label for="punk-launch-description">Description</label>
+            <textarea id="punk-launch-description" name="description" maxlength="1000" placeholder="Describe your token"></textarea>
+            <div class="punk-launch-grid">
+              <div><label for="punk-launch-website">Website</label>
+                <input id="punk-launch-website" name="website" type="url" placeholder="https://example.com"></div>
+              <div><label for="punk-launch-twitter">X profile / token community</label>
+                <input id="punk-launch-twitter" name="twitter" type="url" placeholder="https://x.com/project"></div>
             </div>
-            <label for="punk-stonk-telegram">Telegram</label>
-            <input id="punk-stonk-telegram" name="telegram" type="url" placeholder="https://t.me/project">
-            <label for="punk-stonk-quote">Quote token * · live StonkFun pairs</label>
-            <select id="punk-stonk-quote" name="quoteMint" required disabled>
-              <option value="">Loading…</option>
-            </select>
-            <div class="punk-stonk-actions">
-              <button class="btn" type="button" id="punk-stonk-wallet-button">Connect Wallet</button>
-              <button class="btn primary" type="submit">Review Token</button>
+            <label for="punk-launch-telegram">Telegram</label>
+            <input id="punk-launch-telegram" name="telegram" type="url" placeholder="https://t.me/project">
+            <div class="punk-launch-actions">
+              <button type="button" class="btn" id="punk-wallet-button">Connect Phantom</button>
+              <button type="submit" class="btn primary" id="punk-launch-submit">Create DEVNET Mint</button>
             </div>
           </form>
-          <div id="punk-stonk-review" class="punk-stonk-review" hidden></div>
-          <p class="punk-stonk-note"><strong>Launch is not enabled yet.</strong> This step prepares the on-site form, live quote list and wallet connection only. Mint creation, metadata upload, and transaction signing are still required. No funds move and nothing is launched by Review Token.</p>
+          <div class="punk-launch-result" id="punk-launch-result" hidden></div>
+          <p class="punk-launch-note">Fixed supply: 1,000,000,000 tokens (6 decimals), minted to your wallet.
+          No freeze authority. Mint authority is revoked after minting.
+          The mint and metadata update authority remain under your wallet. Two Phantom confirmations are required.</p>
+          <p class="punk-launch-note"><strong>Not yet live trading:</strong> no bonding curve, liquidity, Jupiter swaps,
+          exchange listing or automated market cap. Devnet metadata image is stored in the PUNK database;
+          the Preview URL is temporary. Mainnet remains disabled.</p>
         </div>
       </section>`;
   } else if (currentPage === 'portfolio') {
@@ -330,8 +323,8 @@ async function loadRegistry() {
 
     if (badge) {
       badge.textContent = connected
-        ? 'REGISTRY LIVE'
-        : 'REGISTRY OFFLINE';
+        ? 'DEVNET READY'
+        : 'DEVNET OFFLINE';
     }
 
     if (currentPage !== 'create') render();
@@ -365,7 +358,7 @@ document.addEventListener('click', event => {
   }
 });
 
-// X sign-in is now handled by punk-x-stonk-client.js.
+// X sign-in is handled by punk-x-client.js.
 
 render();
 loadRegistry();

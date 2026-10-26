@@ -1,4 +1,4 @@
-// PUNK X + StonkFun V1 — client enhancement; no wallet keys are requested.
+// PUNK X OAuth client — client enhancement; no wallet keys are requested.
 // X identity is verified on the server, never guessed from an X username.
 const LOGIN_BUTTON = document.getElementById('connect');
 
@@ -52,23 +52,5 @@ LOGIN_BUTTON?.addEventListener('click', async event => {
   window.location.assign('/auth/x/start');
 });
 
-async function showStonkStatus() {
-  const element = document.getElementById('punk-stonk-status');
-  if (!element) return;
-  element.textContent = 'Checking StonkFun launch availability…';
-  try {
-    const res = await fetch('/api/stonk/pairs', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const payload = await res.json();
-    const pairs = payload?.data?.pairs ?? payload?.pairs;
-    if (!Array.isArray(pairs)) throw new Error('Unexpected StonkFun data');
-    element.textContent = pairs.length
-      ? `StonkFun API connected · ${pairs.length} launch-ready quote asset(s).`
-      : 'StonkFun API connected. No launch-ready quote assets are available right now.';
-  } catch (error) {
-    element.textContent = 'StonkFun API is unavailable from PUNK right now. You can still open the official launch page.';
-  }
-}
 
-// On-site V2 takes over token preparation, no external redirect.
-await loadXSession();
+loadXSession();
