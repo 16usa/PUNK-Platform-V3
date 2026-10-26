@@ -87,10 +87,9 @@ app.get('/api/tokens/:id', async (req, res) => {
 
 // Serve original assets in development and
 // the compiled frontend in production.
-const publicDir = process.env.NODE_ENV === 'production'
-  ? new URL('../dist/public/', import.meta.url)
-  : new URL('./public/', import.meta.url);
-
+// Always serve the compiled Vite assets, including in Replit Preview.
+// The source launch-client imports npm packages and cannot execute as raw browser JS.
+const publicDir = new URL('../dist/public/', import.meta.url);
 app.use(express.static(new URL(publicDir).pathname));
 
 

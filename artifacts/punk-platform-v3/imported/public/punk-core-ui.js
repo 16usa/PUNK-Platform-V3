@@ -323,8 +323,8 @@ async function loadRegistry() {
 
     if (badge) {
       badge.textContent = connected
-        ? 'DEVNET READY'
-        : 'DEVNET OFFLINE';
+        ? 'REGISTRY ONLINE'
+        : 'REGISTRY OFFLINE';
     }
 
     if (currentPage !== 'create') render();
